@@ -1,174 +1,175 @@
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { useState, FormEvent } from 'react';
+import { Mail, Phone, MapPin, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import Layout from '../components/Layout';
 
 export default function Contacts() {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', message_text: '' });
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+
+  const set = (key: string, val: string) => setForm(f => ({ ...f, [key]: val }));
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const { error } = await supabase.from('messages').insert({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      message_text: form.message_text,
+    });
+    if (error) {
+      setError('Произошла ошибка. Попробуйте ещё раз.');
+    } else {
+      setSent(true);
+    }
+    setLoading(false);
+  };
+
+  const inputClass = 'w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all bg-white';
+
+  const contacts = [
+    { icon: MapPin, label: 'Адрес', value: 'Москва, ул. Дружбы, д. 12, офис 301' },
+    { icon: Phone, label: 'Телефон', value: '+7 (495) 123-45-67' },
+    { icon: Mail, label: 'Email', value: 'info@lapkidomoi.ru' },
+    { icon: Clock, label: 'График', value: 'Пн–Пт: 9:00–18:00, Сб: 10:00–15:00' },
+  ];
+
   return (
-    <div className="space-y-12">
-      <section>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Свяжитесь с нами</h1>
-        <p className="text-gray-600 text-lg">Мы всегда рады услышать от вас и ответить на ваши вопросы</p>
-      </section>
-
-      <section className="grid md:grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Контактная информация</h2>
-
-          <div className="space-y-6">
-            <div className="flex gap-4">
-              <MapPin className="w-6 h-6 text-rose-500 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Адрес</h3>
-                <p className="text-gray-600">
-                  ул. Животноводов, 15<br />
-                  Москва, 105043<br />
-                  Россия
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Phone className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Телефон</h3>
-                <p className="text-gray-600">
-                  <a href="tel:+79991234567" className="hover:text-blue-600">
-                    +7 (999) 123-45-67
-                  </a>
-                  <br />
-                  <a href="tel:+79991234568" className="hover:text-blue-600">
-                    +7 (999) 123-45-68
-                  </a>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Mail className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                <p className="text-gray-600">
-                  <a href="mailto:info@shelter.ru" className="hover:text-green-600">
-                    info@shelter.ru
-                  </a>
-                  <br />
-                  <a href="mailto:adoption@shelter.ru" className="hover:text-green-600">
-                    adoption@shelter.ru
-                  </a>
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <Clock className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Режим работы</h3>
-                <p className="text-gray-600">
-                  Пн-Пт: 09:00 - 18:00<br />
-                  Сб-Вс: 10:00 - 16:00<br />
-                  Выходные: официальные праздники
-                </p>
-              </div>
-            </div>
+    <Layout>
+      <div className="pt-20 lg:pt-24 min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-orange-100 py-14">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+              Свяжитесь <span className="text-orange-500">с нами</span>
+            </h1>
+            <p className="text-gray-500 text-lg max-w-xl mx-auto">
+              Есть вопросы? Хотите стать волонтёром? Напишите нам — ответим в течение суток.
+            </p>
           </div>
         </div>
 
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Отправить сообщение</h2>
-          <form className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ваше имя *
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                placeholder="Иван Иванов"
-              />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            {/* Contact info */}
+            <div className="space-y-5">
+              {contacts.map(c => (
+                <div key={c.label} className="flex items-start gap-4 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
+                    <c.icon className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">{c.label}</div>
+                    <div className="text-gray-800 font-medium text-sm">{c.value}</div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Map placeholder */}
+              <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-100 aspect-video bg-gray-200 relative">
+                <img
+                  src="https://images.pexels.com/photos/2990650/pexels-photo-2990650.jpeg?auto=compress&cs=tinysrgb&w=800"
+                  alt="Карта"
+                  className="w-full h-full object-cover opacity-70"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-2.5 shadow-sm text-sm font-medium text-gray-700">
+                    <MapPin className="w-4 h-4 text-orange-500 inline mr-1.5 -mt-0.5" />
+                    ул. Дружбы, д. 12, Москва
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
-              </label>
-              <input
-                type="email"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                placeholder="ivan@example.com"
-              />
-            </div>
+            {/* Form */}
+            <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+              {sent ? (
+                <div className="h-full flex items-center justify-center text-center py-12">
+                  <div>
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+                      <CheckCircle className="w-8 h-8 text-green-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Сообщение отправлено!</h3>
+                    <p className="text-gray-500">Мы ответим вам в ближайшее время.</p>
+                    <button
+                      onClick={() => { setSent(false); setForm({ name: '', email: '', phone: '', message_text: '' }); }}
+                      className="mt-6 px-6 py-2.5 border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Написать ещё
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Форма обратной связи</h2>
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Имя *</label>
+                        <input
+                          type="text"
+                          required
+                          value={form.name}
+                          onChange={e => set('name', e.target.value)}
+                          placeholder="Ваше имя"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Email *</label>
+                        <input
+                          type="email"
+                          required
+                          value={form.email}
+                          onChange={e => set('email', e.target.value)}
+                          placeholder="you@example.com"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Телефон</label>
+                      <input
+                        type="tel"
+                        value={form.phone}
+                        onChange={e => set('phone', e.target.value)}
+                        placeholder="+7 (___) ___-__-__"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Сообщение *</label>
+                      <textarea
+                        required
+                        rows={5}
+                        value={form.message_text}
+                        onChange={e => set('message_text', e.target.value)}
+                        placeholder="Ваш вопрос или предложение..."
+                        className={`${inputClass} resize-none`}
+                      />
+                    </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Телефон
-              </label>
-              <input
-                type="tel"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                placeholder="+7 (999) 123-45-67"
-              />
-            </div>
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Сообщение *
-              </label>
-              <textarea
-                required
-                rows={5}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
-                placeholder="Напишите ваше сообщение..."
-              />
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Отправить сообщение
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-rose-500 text-white py-2 px-4 rounded-lg hover:bg-rose-600 transition-colors font-semibold"
-            >
-              Отправить
-            </button>
-          </form>
+          </div>
         </div>
-      </section>
-
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Как до нас добраться</h2>
-        <div className="bg-gray-200 rounded-lg h-96 flex items-center justify-center">
-          <p className="text-gray-600 text-lg">Здесь будет карта Google Maps</p>
-        </div>
-      </section>
-
-      <section className="bg-blue-50 rounded-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Часто задаваемые вопросы</h2>
-        <div className="space-y-4">
-          <details className="bg-white rounded-lg p-4 cursor-pointer group">
-            <summary className="font-semibold text-gray-900 group-open:text-rose-600">
-              Какие документы нужны для усыновления?
-            </summary>
-            <p className="text-gray-600 mt-2">
-              Вам потребится паспорт, договор об усыновлении и справка о вакцинации, если животное требует.
-            </p>
-          </details>
-
-          <details className="bg-white rounded-lg p-4 cursor-pointer group">
-            <summary className="font-semibold text-gray-900 group-open:text-rose-600">
-              Нужно ли платить за усыновление?
-            </summary>
-            <p className="text-gray-600 mt-2">
-              Нет, усыновление бесплатно. Однако мы благодарны за добровольные пожертвования.
-            </p>
-          </details>
-
-          <details className="bg-white rounded-lg p-4 cursor-pointer group">
-            <summary className="font-semibold text-gray-900 group-open:text-rose-600">
-              Могу ли я вернуть животное, если не приживается?
-            </summary>
-            <p className="text-gray-600 mt-2">
-              Да, мы всегда готовы помочь. Если возникают проблемы, свяжитесь с нами, и мы найдем решение.
-            </p>
-          </details>
-        </div>
-      </section>
-    </div>
+      </div>
+    </Layout>
   );
 }
